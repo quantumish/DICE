@@ -1,0 +1,52 @@
+# AMPL run-file for Hänsel et.al (2020): "Climate economics support for the UN climate targets"
+
+reset;
+model DICE_Update.mod;
+data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
+data nonCO2_forcing.dat;
+
+option solver kestrel;
+option kestrel_options "solver=knitro";
+option email "davfrei@nuevaschool.org";
+
+# Climate Policy pathsways
+
+for {i in 1..nruns} {
+
+# let eta:=etas[i];
+# let rho:=rhos[i];
+
+solve;
+
+
+for {t in 0..T-2}{
+printf "%f\t", EInd[t]>Results_Emissions.csv;}
+printf "%f\n", EInd[T-1]>Results_Emissions.csv;
+for {t in 0..T-2}{
+printf "%f\t", TAT_IPCC[t]>Results_Temperature.csv;}
+printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
+
+
+for {t in 0..T-2}{
+printf "%f\t", (-1000*constr_emissions[t])/(.00001+constr_accounting[t])>Results_SCC.csv;}
+printf "%f\n", (-1000*constr_emissions[T-1])/(.00001+constr_accounting[T-1])>Results_SCC.csv;
+
+}
+
+# Prints results when the model is run to calculate the Nordhaus or Median Expert path
+
+#for {i in 0..T-1}
+#{  
+#    printf "%f\t", i>Results_Nordhaus.csv; # change to "Results_Median_Expert" with median expert discounting parameters
+#    printf "%f\t", EInd[i]>Results_Nordhaus.csv;
+#    printf "%f\t", TAT_IPCC[i]>Results_Nordhaus.csv;
+#	printf "%f\n", (-1000*constr_emissions[i])/(.00001+constr_accounting[i])>Results_Nordhaus.csv;
+#}
+
+end
+
+
+
+
+
+
