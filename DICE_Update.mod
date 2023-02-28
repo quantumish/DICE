@@ -14,26 +14,30 @@ param nruns;
 
 # named constant signifying i know this param exists but no idea what its value is
 param IDK_THE_VALUE:=0;
+# named constant signifying this is a parameter but idk how to choose it
+param IDK_A_GOOD_VALUE:=0;
+
+# NOTE we're using base parameters
 
 # percentage of exogenous reductions in carbon intensity remaining
-param alpha_phi:=IDK_THE_VALUE;
+param alpha_phi:=0.8;
 # scaling factor for the effect of this human capital
-param alpha_H:=IDK_THE_VALUE;
+param alpha_H:=0.336;
 # substitution parameter. rho_E <= 1
-param rho_E:=IDK_THE_VALUE;
+param rho_E:=0.38;
 
 
 # rate of knowledge decay (<= 1)
 param delta_H := 0.01; # NOTE: set arbitrarily
 
+let R_E[0]:=10^9;
 # energy R&D spending
 var R_E {t in 0..T}>=0;
-let R_E[0]:=10^9;
 
 # invention possibilities frontier constants
-param a:=IDK_THE_VALUE;
-param b:=IDK_THE_VALUE;
-param phi:=IDK_THE_VALUE;
+param a:=0.02961;
+param b:=0.2;
+param phi:=0.55;
 
 # level of fossil fuels used
 param F_f_0:=0;
@@ -52,9 +56,12 @@ param delta_z:=IDK_THE_VALUE;
 # the ratio of carbon emissions per unit of carbon services
 param Phi {t in 0..T}:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)));
 
+# TODO reconcile all this w/ existing enen
+# Energy? Emissions?? Which one?? Pg. 748 and 749 seemingly contradict each other?
 # param E_0:=IDK_THE_VALUE;
 # param E{t in 0..T}:=(alpha_H*H_E[t]^rho_E + ((F_f[t])/(alpha_phi*Phi[t]))^rho_E)^(1/rho_E);
 
+# percentage of other R&D crowded out by energy R&D
 param crowdout:=0.5;
 
 #######
@@ -227,12 +234,11 @@ var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
 # industrial emissions
 var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
 
+# marginal cost of carbon extraction
 var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
 
-# are these the same? we will forever wonder.
-param p_F:=IDK_THE_VALUE;
+# price of carbon
 var P_F{t in 0..T}=q_F[t] + 163.29;
-
 
 # Marginal cost of abatement (carbon price)
 var cprice {t in 0..T}=pback[t]*mu[t]^(Theta-1);
