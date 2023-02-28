@@ -1,4 +1,14 @@
 
+# AMPL mod-file for H�nsel et.al (2020): "Climate economics support for the UN climate targets"
+# when using the code the article needs to be cited
+
+# PARAMETERS
+#Time horizon   
+param T:=100;    
+param nruns;
+
+#######
+
 
 # ENTICE-2020
 
@@ -13,26 +23,6 @@ param alpha_H:=IDK_THE_VALUE;
 param rho_E:=IDK_THE_VALUE;
 
 
-# the (negative) growth rate of Phi_t per decade
-param g_t_z:=IDK_THE_VALUE;
-# the rate of decline of g_t_z
-param delta_z:=IDK_THE_VALUE;
-# the ratio of carbon emissions per unit of carbon services
-param Phi_t:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)))
-
-param E_0:=IDK_THE_VALUE;
-param E_t {t in 0..T}:=(alpha_H*H_E[t]^rho_E + ((F_t)/(alpha_phi*Phi_t))^rho_E)^(1/rho_E);
-
-param F_0:=0;
-param F_t {t in 0..T}:=0;
-
-param q_F {t in 0..T}: 113 + 700*(Ecum[t]/6000)^4; # Ecum/6000 as model for carbon extraction is dubious
-
-# are these the same? we will forever wonder.
-param p_F:=IDK_THE_VALUE;
-param P_F:=q_f + 163.29;
-
-
 # rate of knowledge decay (<= 1)
 param delta_H := 0.01; # NOTE: set arbitrarily
 
@@ -45,20 +35,30 @@ param a:=IDK_THE_VALUE;
 param b:=IDK_THE_VALUE;
 param phi:=IDK_THE_VALUE;
 
+# level of fossil fuels used
+param F_f_0:=0;
+param F_f{t in 0..T}:=IDK_THE_VALUE;
+
 # knowledge stock
-param H_E[t in 0..T]>=0;
+param H_E{t in 0..T}>=0;
 let H_E[0]:=0;
-param H_E {t in 1..T}:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
+let {t in 1..T} H_E[t]:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
+
+
+# the (negative) growth rate of Phi_t per decade
+param g_t_z:=IDK_THE_VALUE;
+# the rate of decline of g_t_z
+param delta_z:=IDK_THE_VALUE;
+# the ratio of carbon emissions per unit of carbon services
+param Phi {t in 0..T}:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)));
+
+# param E_0:=IDK_THE_VALUE;
+# param E{t in 0..T}:=(alpha_H*H_E[t]^rho_E + ((F_f[t])/(alpha_phi*Phi[t]))^rho_E)^(1/rho_E);
 
 param crowdout:=0.5;
 
-# AMPL mod-file for H�nsel et.al (2020): "Climate economics support for the UN climate targets"
-# when using the code the article needs to be cited
+#######
 
-# PARAMETERS
-#Time horizon   
-param T:=100;    
-param nruns;
 
 # Preferences
 # delete this line for obtaining just the Nordhaus optimal policy
@@ -179,8 +179,14 @@ param phead {t in 0..T}=pback[t]*sigma[t]/Theta/1000;
 # capital (trillions 2010 USD)
 var K {t in 0..T}>=1;
 
+# total emissions
+var E {t in 0..T};
+
+# maximum cumulative extraction fossil fuels (GtC)
+var Ecum {t in 0..T}<=6000;
+
 # Gross output (trillions 2010 USD)
-var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma)*E[t]];
+var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma)*E[t];
 
 # carbon cycle 
 
@@ -221,11 +227,12 @@ var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
 # industrial emissions
 var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
 
-# total emissions
-var E {t in 0..T};
+var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
 
-# maximum cumulative extraction fossil fuels (GtC)
-var Ecum {t in 0..T}<=6000; 
+# are these the same? we will forever wonder.
+param p_F:=IDK_THE_VALUE;
+var P_F{t in 0..T}=q_F[t] + 163.29;
+
 
 # Marginal cost of abatement (carbon price)
 var cprice {t in 0..T}=pback[t]*mu[t]^(Theta-1);

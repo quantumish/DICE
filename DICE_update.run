@@ -5,9 +5,11 @@ model DICE_Update.mod;
 data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
 data nonCO2_forcing.dat;
 
-option solver kestrel;
-option kestrel_options "solver=knitro";
-option email "davfrei@nuevaschool.org";
+# option solver kestrel;
+# option kestrel_options "solver=knitro";
+# option email "davfrei@nuevaschool.org";
+
+option solver couenne;
 
 # Climate Policy pathsways
 
