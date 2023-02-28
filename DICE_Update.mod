@@ -1,3 +1,57 @@
+
+
+# ENTICE-2020
+
+# named constant signifying i know this param exists but no idea what its value is
+param IDK_THE_VALUE:=0;
+
+# percentage of exogenous reductions in carbon intensity remaining
+param alpha_phi:=IDK_THE_VALUE;
+# scaling factor for the effect of this human capital
+param alpha_H:=IDK_THE_VALUE;
+# substitution parameter. rho_E <= 1
+param rho_E:=IDK_THE_VALUE;
+
+
+# the (negative) growth rate of Phi_t per decade
+param g_t_z:=IDK_THE_VALUE;
+# the rate of decline of g_t_z
+param delta_z:=IDK_THE_VALUE;
+# the ratio of carbon emissions per unit of carbon services
+param Phi_t:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)))
+
+param E_0:=IDK_THE_VALUE;
+param E_t {t in 0..T}:=(alpha_H*H_E[t]^rho_E + ((F_t)/(alpha_phi*Phi_t))^rho_E)^(1/rho_E);
+
+param F_0:=0;
+param F_t {t in 0..T}:=0;
+
+param q_F {t in 0..T}: 113 + 700*(Ecum[t]/6000)^4; # Ecum/6000 as model for carbon extraction is dubious
+
+# are these the same? we will forever wonder.
+param p_F:=IDK_THE_VALUE;
+param P_F:=q_f + 163.29;
+
+
+# rate of knowledge decay (<= 1)
+param delta_H := 0.01; # NOTE: set arbitrarily
+
+# energy R&D spending
+var R_E {t in 0..T}>=0;
+let R_E[0]:=10^9;
+
+# invention possibilities frontier constants
+param a:=IDK_THE_VALUE;
+param b:=IDK_THE_VALUE;
+param phi:=IDK_THE_VALUE;
+
+# knowledge stock
+param H_E[t in 0..T]>=0;
+let H_E[0]:=0;
+param H_E {t in 1..T}:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
+
+param crowdout:=0.5;
+
 # AMPL mod-file for H�nsel et.al (2020): "Climate economics support for the UN climate targets"
 # when using the code the article needs to be cited
 
@@ -126,7 +180,7 @@ param phead {t in 0..T}=pback[t]*sigma[t]/Theta/1000;
 var K {t in 0..T}>=1;
 
 # Gross output (trillions 2010 USD)
-var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma);
+var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma)*E[t]];
 
 # carbon cycle 
 
@@ -199,9 +253,10 @@ var W=sum{t in 0..T} L[t]*U[t]*R[t];
 
 # welfare optimization
 maximize objective_function: W;
-subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t];
+subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t]-R_E[t];
 subject to constr_emissions {t in 0..T}: 			E[t]=EInd[t]+ELand[t];
-subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1];
+#todo things like I and R_E are t-1 rather than t but the model was already like this so :shrug:
+subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1]-(4*crowdout*R_E[t-1]); 
 subject to constr_cumulativeemissions {t in 1..T}: 	Ecum[t]=Ecum[t-1]+(EInd[t-1]*5/3.666); 
 
 
