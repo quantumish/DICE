@@ -5,11 +5,11 @@ model DICE_Update.mod;
 data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
 data nonCO2_forcing.dat;
 
-# option solver kestrel;
-# option kestrel_options "solver=knitro";
-# option email "davfrei@nuevaschool.org";
+option solver kestrel;
+option kestrel_options "solver=knitro";
+option email "davfrei@nuevaschool.org";
 
-option solver couenne;
+# option solver couenne;
 
 # Climate Policy pathsways
 
@@ -21,16 +21,14 @@ for {i in 1..nruns} {
 solve;
 
 
-for {t in 0..T-2}{
-printf "%f\t", EInd[t]>Results_Emissions.csv;}
+for {t in 0..T-2}{printf "%f\n", EInd[t]>Results_Emissions.;}
 printf "%f\n", EInd[T-1]>Results_Emissions.csv;
-for {t in 0..T-2}{
-printf "%f\t", TAT_IPCC[t]>Results_Temperature.csv;}
+for {t in 0..T-2}{printf "%f\n", TAT_IPCC[t]>Results_Temperature.csv;}
 printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
 
 
 for {t in 0..T-2}{
-printf "%f\t", (-1000*constr_emissions[t])/(.00001+constr_accounting[t])>Results_SCC.csv;}
+printf "%f\n", (-1000*constr_emissions[t])/(.00001+constr_accounting[t])>Results_SCC.csv;}
 printf "%f\n", (-1000*constr_emissions[T-1])/(.00001+constr_accounting[T-1])>Results_SCC.csv;
 
 }
