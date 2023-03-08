@@ -1,6 +1,7 @@
 
 # AMPL mod-file for H�nsel et.al (2020): "Climate economics support for the UN climate targets"
 # when using the code the article needs to be cited
+# Modified by David (hi)
 
 # PARAMETERS
 #Time horizon   
@@ -183,17 +184,15 @@ var Ecum {t in 0..T}<=6000;
 
 # fossil fuel usage
 # CarbMax is vague, 6000 likely incorrect
-var F_f{t in 0..T}>=0;
-subject to constr_F_f {t in 0..T}: F_f[t] <= 0.1 * (6000-Ecum[t])/10;
+# var F_f{t in 0..T}>=0;
+# subject to constr_F_f {t in 0..T}: F_f[t] <= 0.1 * (6000-Ecum[t])/10;
 
 # total emissions
 # FIXME backstop energy not included
-var E {t in 0..T} = (alpha_H*(H_E[t]^rho) + ((F_f[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho);
-
-
+var E {t in 0..T};
 
 # Gross output (trillions 2010 USD)
-var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma)*E[t];
+var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma);
 
 # carbon cycle 
 
@@ -233,6 +232,7 @@ var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
 
 # industrial emissions
 var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
+# var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((EInd[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho);
 
 # marginal cost of carbon extraction
 var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
@@ -261,12 +261,12 @@ var U {t in 0..T} =c[t]^(1-eta)/(1-eta);
 # total period utility
 var U_period {t in 0..T}=U[t]*R[t];
 
-# welfare/objective function
+# welfare/objective function sl
 var W=sum{t in 0..T} L[t]*U[t]*R[t];
 
 # welfare optimization
 maximize objective_function: W;
-subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t]-R_E[t];
+subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t];
 subject to constr_emissions {t in 0..T}: 			E[t]=EInd[t]+ELand[t];
 #todo things like I and R_E are t-1 rather than t but the model was already like this so :shrug:
 subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1]-(4*crowdout*R_E[t-1]); 
