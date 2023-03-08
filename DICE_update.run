@@ -2,52 +2,45 @@
 
 reset;
 model DICE_Update.mod;
-data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
+# data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
 data nonCO2_forcing.dat;
 
 option solver kestrel;
 option kestrel_options "solver=knitro";
 option email "davfrei@nuevaschool.org";
-
-# option solver couenne;
+option knitro_options "maxit=10000 opttol=1.0e-10 multistart=1 ms_terminate=1 ms_maxsolves=7 scale=1";
 
 # Climate Policy pathsways
-
+param nruns:=1;
 for {i in 1..nruns} {
 
-# let eta:=etas[i];
-# let rho:=rhos[i];
-
 solve;
-
 
 for {t in 0..T-2}{printf "%f\n", E[t]>Results_Emissions.csv;}
 printf "%f\n", E[T-1]>Results_Emissions.csv;
 
-for {t in 0..T-2}{printf "%f\n", R_E[t]>Results_Research.csv;}
-printf "%f\n", R_E[T-1]>Results_Research.csv;
+# for {t in 0..T-2}{printf "%f\n", R_E[t]>Results_Research.csv;}
+# printf "%f\n", R_E[T-1]>Results_Research.csv;
 
 for {t in 0..T-2}{printf "%f\n", TAT_IPCC[t]>Results_Temperature.csv;}
 printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
 
-
-# for {t in 0..T-2}{
-# printf "%f\n", (-1000*constr_emissions[t])/(.00001+constr_accounting[t])>Results_SCC.csv;}
-# printf "%f\n", (-1000*constr_emissions[T-1])/(.00001+constr_accounting[T-1])>Results_SCC.csv;
+for {t in 0..T-2}{
+printf "%f\t", (-1000*constr_emissions[t])/(constr_accounting[t])>Results_SCC.csv;}
+printf "%f\n", (-1000*constr_emissions[T-1])/(constr_accounting[T-1])>Results_SCC.csv;
 
 }
 
-# Prints results when the model is run to calculate the Nordhaus or Median Expert path
-
-#for {i in 0..T-1}
-#{  
-#    printf "%f\t", i>Results_Nordhaus.csv; # change to "Results_Median_Expert" with median expert discounting parameters
-#    printf "%f\t", EInd[i]>Results_Nordhaus.csv;
-#    printf "%f\t", TAT_IPCC[i]>Results_Nordhaus.csv;
-#	printf "%f\n", (-1000*constr_emissions[i])/(.00001+constr_accounting[i])>Results_Nordhaus.csv;
-#}
+for {i in 0..T-1}
+{  
+   printf "%f\t", i>Results_Nordhaus.csv; # change to "Results_Median_Expert" with median expert discounting parameters
+   printf "%f\t", EInd[i]>Results_Nordhaus.csv;
+   printf "%f\t", TAT_IPCC[i]>Results_Nordhaus.csv;
+   printf "%f\n", (-1000*constr_emissions[i])/(constr_accounting[i])>Results_Nordhaus.csv;
+}
 
 end
+
 
 
 
