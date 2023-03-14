@@ -19,8 +19,12 @@ solve;
 for {t in 0..T-2}{printf "%f\n", E[t]>Results_Emissions.csv;}
 printf "%f\n", E[T-1]>Results_Emissions.csv;
 
-# for {t in 0..T-2}{printf "%f\n", R_E[t]>Results_Research.csv;}
-# printf "%f\n", R_E[T-1]>Results_Research.csv;
+for {t in 0..T-2}{printf "%f\n", R_E[t]>Results_Research.csv;}
+printf "%f\n", R_E[T-1]>Results_Research.csv;
+
+for {t in 0..T-2}{printf "%f\n", E_e[t]>Results_Energy.csv;}
+printf "%f\n", E_e[T-1]>Results_Energy.csv;
+
 
 for {t in 0..T-2}{printf "%f\n", TAT_IPCC[t]>Results_Temperature.csv;}
 printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;

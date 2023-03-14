@@ -20,42 +20,43 @@ param T:=100;
 # # named constant signifying this is a parameter but idk how to choose it
 # param IDK_A_GOOD_VALUE:=0;
 
-# # NOTE we're using base parameters
+# # NOTE we're using base ENTICE parameters
 
 # # percentage of exogenous reductions in carbon intensity remaining
-# param alpha_phi:=0.8;
+param alpha_phi:=0.8;
 # # scaling factor for the effect of this human capital
-# param alpha_H:=0.336;
+param alpha_H:=0.336;
 # # substitution parameter between energy/knowledge. rho_H <= 1
-# param rho_H:=0.38;
+param rho_H:=0.38;
 
 
-# # rate of knowledge decay (<= 1)
-# param delta_H := 0;
+# rate of knowledge decay (<= 1)
+param delta_H := 0;
 
-# # energy R&D spending
-# var R_E {t in 0..T}>=0;
+# energy R&D spending
+var R_E {t in 0..T}>=0;
+param R_E0:=10^9;
 # let R_E[0]:=10^9;
 
-# # invention possibilities frontier constants
-# param a:=0.02961;
-# param b:=0.2;
-# param phi:=0.55;
+# invention possibilities frontier constants
+param a:=0.02961;
+param b:=0.2;
+param phi:=0.55;
 
-# # knowledge stock
-# param H_E{t in 0..T}>=0;
-# let H_E[0]:=0.0001; # must be >0
-# let {t in 1..T} H_E[t]:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
+# knowledge stock
+param H_E{t in 0..T}>=0;
+let H_E[0]:=0.0001; # must be >0
+let {t in 1..T} H_E[t]:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
 
 # # the (negative) growth rate of Phi_t per decade
-# param g_t_z:=-15.49;
+param g_t_z:=-15.49;
 # # the rate of decline of g_t_z
-# param delta_z:=23.96;
+param delta_z:=23.96;
 # # the ratio of carbon emissions per unit of carbon services
-# param Phi {t in 0..T}:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)));
+param Phi {t in 0..T}:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)));
 
 # # percentage of other R&D crowded out by energy R&D
-# param crowdout:=0.5;
+param crowdout:=0.5;
 
 #######
 
@@ -218,27 +219,31 @@ var mu {t in 0..T}>=0;
 # abatement costs (fraction of output)
 var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
 
+# maximum cumulative extraction fossil fuels (GtC)
+var Ecum {t in 0..T}<=6000;
+
 # industrial emissions
-var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
-# var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((EInd[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho);
+# var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
+var EInd{t in 0..T};
+subject to constr_ind_emission {t in 0..T}: EInd[t]<=0.1*(6000-Ecum[t])/10;
+
+var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((EInd[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho_H);
 
 # emissions
 var E {t in 0..T};
 
-# maximum cumulative extraction fossil fuels (GtC)
-var Ecum {t in 0..T}<=6000;
-
 # # marginal cost of carbon extraction
-# var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
+var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
 
 # # price of carbon
-# var P_F{t in 0..T}=q_F[t] + 163.29;
+var P_F{t in 0..T}=q_F[t] + 163.29;
 
 # Marginal cost of abatement (carbon price)
 var cprice {t in 0..T}=pback[t]*mu[t]^(Theta-1);
 
 # output net of damages and abatement (trillions 2010 USD)
-var Q {t in 0..T}=(Qgross[t]*(1-Omega[t]))-Lambda[t];
+var Q {t in 0..T}=(Qgross[t]*(1-Omega[t])*E_e[t]-Lambda[t]) -(P_F[t]*EInd[t]);
+# ;
 
 # per capita consumption (1000s 2010 USD]
 var c {t in 0..T} >= .1;
@@ -260,10 +265,10 @@ var W=sum{t in 0..T} L[t]*U[t]*R[t];
 
 # welfare optimization
 maximize objective_function: W;
-subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t];
+subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t]-R_E[t];
 subject to constr_emissions {t in 0..T}: 			E[t]=EInd[t]+ELand[t];
 #todo things like I and R_E are t-1 rather than t but the model was already like this so :shrug:
-subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1];# -(4*crowdout*R_E[t-1]); 
+subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1] -(4*crowdout*R_E[t-1]); 
 subject to constr_cumulativeemissions {t in 1..T}: 		Ecum[t]=Ecum[t-1]+((E[t-1]-ELand[t-1])*5/3.666); 
 
 
@@ -289,6 +294,8 @@ subject to constr_ocean_temp {t in 0..T-1}: 						TLO[t+1]=TLO[t]+5*xi3/xi4*(TAT
 
 # Initial conditions
 subject to initial_capital: 		K[0] = K0;
+# NOTE: this blows up a condition, so we don't do it. 
+# subject to initial_research: 		R_E[0] = 10^9;
 subject to initial_Ecum: 			Ecum[0]=Ecum0;
 subject to initial_MAT: 			MAT[0]=MAT0;
 subject to initial_TLO: 			TLO[0]=TLO0;
