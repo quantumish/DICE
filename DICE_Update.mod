@@ -35,7 +35,7 @@ param delta_H := 0;
 
 # energy R&D spending
 var R_E {t in 0..T}>=0;
-param R_E0:=10^9;
+param R_E0:=0.001;
 # let R_E[0]:=10^9;
 
 # invention possibilities frontier constants
@@ -227,10 +227,10 @@ var Ecum {t in 0..T}<=6000;
 var EInd{t in 0..T};
 subject to constr_ind_emission {t in 0..T}: EInd[t]<=0.1*(6000-Ecum[t])/10;
 
-var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((EInd[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho_H);
-
 # emissions
 var E {t in 0..T};
+
+var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((E[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho_H);
 
 # # marginal cost of carbon extraction
 var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
@@ -295,7 +295,7 @@ subject to constr_ocean_temp {t in 0..T-1}: 						TLO[t+1]=TLO[t]+5*xi3/xi4*(TAT
 # Initial conditions
 subject to initial_capital: 		K[0] = K0;
 # NOTE: this blows up a condition, so we don't do it. 
-# subject to initial_research: 		R_E[0] = 10^9;
+subject to initial_research: 		R_E[0] = R_E0;
 subject to initial_Ecum: 			Ecum[0]=Ecum0;
 subject to initial_MAT: 			MAT[0]=MAT0;
 subject to initial_TLO: 			TLO[0]=TLO0;
