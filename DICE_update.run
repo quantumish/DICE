@@ -38,8 +38,8 @@ for {t in 0..T-2}{printf "%f\n", TAT_IPCC[t]>Results_Temperature.csv;}
 printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
 
 for {t in 0..T-2}{
-printf "%f\t", (-1000*constr_emissions[t])/(constr_accounting[t])>Results_SCC.csv;}
-printf "%f\n", (-1000*constr_emissions[T-1])/(constr_accounting[T-1])>Results_SCC.csv;
+printf "%f\n", (-1000*constr_emissions[t])/(constr_accounting[t])>Results_SCC.csv;}
+# printf "%f\n", (-1000*constr_emissions[T-1])/(constr_accounting[T-1])>Results_SCC.csv;
 
 }
 

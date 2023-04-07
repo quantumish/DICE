@@ -35,7 +35,7 @@ param delta_H := 0;
 
 # energy R&D spending
 var R_E {t in 0..T}>=0;
-param R_E0:=0.001;
+param R_E0:=0.01;
 # let R_E[0]:=10^9;
 
 # invention possibilities frontier constants
@@ -43,7 +43,7 @@ param a:=0.02961;
 param b:=0.2;
 param phi:=0.55;
 
-# knowledge stock
+# # knowledge stock
 param H_E{t in 0..T}>=0;
 let H_E[0]:=0.0001; # must be >0
 let {t in 1..T} H_E[t]:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
@@ -223,9 +223,9 @@ var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
 var Ecum {t in 0..T}<=6000;
 
 # industrial emissions
-# var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
-var EInd{t in 0..T};
-subject to constr_ind_emission {t in 0..T}: EInd[t]<=0.1*(6000-Ecum[t])/10;
+var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
+# var EInd{t in 0..T};
+# subject to constr_ind_emission {t in 0..T}: EInd[t]<=0.1*(6000-Ecum[t])/10;
 
 # emissions
 var E {t in 0..T};
@@ -242,7 +242,7 @@ var P_F{t in 0..T}=q_F[t] + 163.29;
 var cprice {t in 0..T}=pback[t]*mu[t]^(Theta-1);
 
 # output net of damages and abatement (trillions 2010 USD)
-var Q {t in 0..T}=(Qgross[t]*(1-Omega[t])*E_e[t]-Lambda[t]) -(P_F[t]*EInd[t]);
+var Q {t in 0..T}=(Qgross[t]*(1-Omega[t]))-Lambda[t];
 # ;
 
 # per capita consumption (1000s 2010 USD]
@@ -268,7 +268,7 @@ maximize objective_function: W;
 subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t]-R_E[t];
 subject to constr_emissions {t in 0..T}: 			E[t]=EInd[t]+ELand[t];
 #todo things like I and R_E are t-1 rather than t but the model was already like this so :shrug:
-subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1] -(4*crowdout*R_E[t-1]); 
+subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1];# -(4*crowdout*R_E[t-1]); 
 subject to constr_cumulativeemissions {t in 1..T}: 		Ecum[t]=Ecum[t-1]+((E[t-1]-ELand[t-1])*5/3.666); 
 
 
