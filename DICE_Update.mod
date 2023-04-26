@@ -15,51 +15,48 @@ param T:=100;
 
 # ENTICE-2020
 
-# # named constant signifying i know this param exists but no idea what its value is
-# param IDK_THE_VALUE:=0;
-# # named constant signifying this is a parameter but idk how to choose it
-# param IDK_A_GOOD_VALUE:=0;
+# NOTE we're using "base" ENTICE parameters
 
-# # NOTE we're using base ENTICE parameters
-
-# # percentage of exogenous reductions in carbon intensity remaining
+# percentage of exogenous reductions in carbon intensity remaining
 param alpha_phi:=0.8;
-# # scaling factor for the effect of this human capital
+# scaling factor for the effect of this human capital
 param alpha_H:=0.336;
-# # substitution parameter between energy/knowledge. rho_H <= 1
+# substitution parameter between energy/knowledge. rho_H <= 1
 param rho_H:=0.38;
-
 
 # rate of knowledge decay (<= 1)
 param delta_H := 0;
 
-# energy R&D spending
+# energy R&D spending (trillions 2010)
 var R_E {t in 0..T}>=0;
-param R_E0:=0.01;
-# let R_E[0]:=10^9;
 
-# invention possibilities frontier constants
+# init value of 20 billion calculated in the same way as ENTICE paper:
+# took the approximate global R&D spending for 2010 (~ 1 trillion) and
+# multiplied it by 0.02
+param R_E0:=0.02; 
+
+# # invention possibilities frontier constants
 param a:=0.02961;
 param b:=0.2;
 param phi:=0.55;
 
 # # knowledge stock
 param H_E{t in 0..T}>=0;
-let H_E[0]:=0.0001; # must be >0
-let {t in 1..T} H_E[t]:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
+let H_E[0]:=0.0001; # must be >0, taken from ENTICE base
+# units here are sketchy... may be worth converting R_E to dollars here
+let {t in 1..T} H_E[t]:=a*((R_E[t])^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]);
 
-# # the (negative) growth rate of Phi_t per decade
+# the (negative) growth rate of Phi_t per decade
 param g_t_z:=-15.49;
-# # the rate of decline of g_t_z
+# the rate of decline of g_t_z
 param delta_z:=23.96;
-# # the ratio of carbon emissions per unit of carbon services
+# the ratio of carbon emissions per unit of carbon services
 param Phi {t in 0..T}:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)));
 
-# # percentage of other R&D crowded out by energy R&D
+# percentage of other R&D crowded out by energy R&D
 param crowdout:=0.5;
 
 #######
-
 
 # Preferences
 # delete this line for obtaining just the Nordhaus optimal policy
@@ -158,6 +155,7 @@ param xi4:=106;	# Coefficient of heat gain by deep oceans
 param kappa:=3.6813; # Forcings of equilibrium CO2 doubling (Wm-2)
 param xi2:=kappa/nu; # climate model parameter 
 param Fex {t in 0..T};# non-CO2 forcings (Wm-2) according to REMIND SSP2 2.6
+data nonCO2_forcing.dat;
 
 # climate damage parameters
 param Psi:=0.007438; 			# Based on Howard and Sterner (2017)
@@ -180,8 +178,13 @@ param phead {t in 0..T}=pback[t]*sigma[t]/Theta/1000;
 # capital (trillions 2010 USD)
 var K {t in 0..T}>=1;
 
+# elasticity of output with respect to energy/carbon inputs
+# calculated in the same way ENTICE did it (maybe?) by taking the
+# price of carbon emissions in the initial period and dividing by gross output
+param beta = 0.09389;
+
 # Gross output (trillions 2010 USD)
-var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma);
+var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma-beta))*(K[t]^gamma);
 
 # carbon cycle 
 
@@ -223,27 +226,30 @@ var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
 var Ecum {t in 0..T}<=6000;
 
 # industrial emissions
-var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
+var EInd {t in 0..T} = sigma[t]*Qgross[t]*(1-mu[t]);
+# var EInd {t in 0..T} >= 0;
+# let {t in 0..T} EInd[t] := sigma[t]*Qgross[t]*(1-mu[t]);
+
 # var EInd{t in 0..T};
 # subject to constr_ind_emission {t in 0..T}: EInd[t]<=0.1*(6000-Ecum[t])/10;
 
 # emissions
-var E {t in 0..T};
+var E {t in 0..T} >= 0;
 
+# # sketchy ver half derived from backstop tech
 var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((E[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho_H);
 
-# # marginal cost of carbon extraction
+# marginal cost of carbon extraction
 var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
 
-# # price of carbon
+# price of 1 ton of carbon
 var P_F{t in 0..T}=q_F[t] + 163.29;
 
 # Marginal cost of abatement (carbon price)
 var cprice {t in 0..T}=pback[t]*mu[t]^(Theta-1);
 
 # output net of damages and abatement (trillions 2010 USD)
-var Q {t in 0..T}=(Qgross[t]*(1-Omega[t]))-Lambda[t];
-# ;
+var Q {t in 0..T}=(Qgross[t]*(1-Omega[t])*E_e[t])-Lambda[t]-((P_F[t] * 10^9 * E[t])/(10^12));
 
 # per capita consumption (1000s 2010 USD]
 var c {t in 0..T} >= .1;
@@ -265,10 +271,11 @@ var W=sum{t in 0..T} L[t]*U[t]*R[t];
 
 # welfare optimization
 maximize objective_function: W;
-subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t]-R_E[t];
+subject to constr_accounting {t in 0..T}: 			C[t]=Q[t]-I[t]-R_E[t]; # CHANGE
 subject to constr_emissions {t in 0..T}: 			E[t]=EInd[t]+ELand[t];
 #todo things like I and R_E are t-1 rather than t but the model was already like this so :shrug:
-subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1];# -(4*crowdout*R_E[t-1]); 
+#this contradicts with ENTICE so may be the source of issues
+subject to constr_capital_dynamics {t in 1..T}: 	K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1];#-(4*crowdout*R_E[t-1]); # CHANGE
 subject to constr_cumulativeemissions {t in 1..T}: 		Ecum[t]=Ecum[t-1]+((E[t-1]-ELand[t-1])*5/3.666); 
 
 
@@ -284,7 +291,7 @@ subject to carbon_cycle_calibration {t in 1..T, box in 1..4}: c_cycle[t,box] = c
 subject to constr_atmosphere {t in 0..T}: 			MAT[t]= sum{box in 1..4} c_cycle[t,box] + 588;	
 
 
-#Equation below have been rewritten to match a geophysical interpretation of the energy balance model based on Geoffroy (2013)
+# Equation below have been rewritten to match a geophysical interpretation of the energy balance model based on Geoffroy (2013)
 
 subject to constr_atmospheric_temp_1 {t in 0..T, ts in 1..5}: 		TAT_short[t,1]=TAT[t];
 subject to constr_atmospheric_temp_2 {t in 0..T-1, ts in 1..4}:   	TAT_short[t,ts+1]=TAT_short[t,ts] + 1/xi1*((F[t+1]-xi2*TAT_short[t,ts])-(xi3*(TAT_short[t,ts]-TLO[t])));
@@ -292,10 +299,9 @@ subject to constr_atmospheric_temp_3 {t in 0..T-1, ts in 1..5}: 	TAT[t+1]=TAT_sh
 subject to constr_ocean_temp {t in 0..T-1}: 						TLO[t+1]=TLO[t]+5*xi3/xi4*(TAT[t]-TLO[t]);
 
 
-# Initial conditions
 subject to initial_capital: 		K[0] = K0;
 # NOTE: this blows up a condition, so we don't do it. 
-subject to initial_research: 		R_E[0] = R_E0;
+subject to initial_research: 		R_E[0] = R_E0; # CHANGE
 subject to initial_Ecum: 			Ecum[0]=Ecum0;
 subject to initial_MAT: 			MAT[0]=MAT0;
 subject to initial_TLO: 			TLO[0]=TLO0;
