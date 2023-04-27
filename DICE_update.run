@@ -21,11 +21,17 @@ printf "%f\n", E[T-1]>Results_Emissions.csv;
 for {t in 0..T-2}{printf "%f\n", R_E[t]>Results_Research.csv;}
 printf "%f\n", R_E[T-1]>Results_Research.csv;
 
-# for {t in 0..T-2}{printf "%f\n", E_e[t]>Results_Energy.csv;}
-# printf "%f\n", E_e[T-1]>Results_Energy.csv;
+for {t in 0..T-2}{printf "%f\n", E_e[t]>Results_Energy.csv;}
+printf "%f\n", E_e[T-1]>Results_Energy.csv;
 
-for {t in 0..T-2}{printf "%f\n", (P_F[t] * E[t])>Results_CarbCost.csv;}
-printf "%f\n", (P_F[T-1] * E[T-1])>Results_CarbCost.csv;
+for {t in 0..T-2}{printf "%f\n", CumC[t]>Results_CumC.csv;}
+printf "%f\n", CumC[T-1]>Results_CumC.csv;
+
+for {t in 0..T-2}{printf "%f\n", Ecum[t]>Results_Ecum.csv;}
+printf "%f\n", Ecum[T-1]>Results_Ecum.csv;
+
+for {t in 0..T-2}{printf "%f\n", ((P_F[t] * 10^9 * EInd[t])/10^12)>Results_CarbCost.csv;}
+printf "%f\n", ((P_F[T-1] * 10^9 * EInd[T-1])/10^12)>Results_CarbCost.csv;
 
 for {t in 0..T-2}{printf "%f\n", Q[t]>Results_Q.csv;}
 printf "%f\n", Q[T-1]>Results_Q.csv;

@@ -1,0 +1,54 @@
+
+#+TITLE: Problems
+#+SUBTITLE: Because we've got so many, I can't remember them all.
+#+HTML_HEAD: <link rel="stylesheet" href="https://latex.now.sh/style.css">
+#+HTML_HEAD: <style>.admonition-content > p {padding: 10px 0px 10px 0px; margin-top: 0rem;} .admonition-title{padding: 0.3em 0.25em;} body {max-width: 130ch} .admonition { margin-bottom: 1rem; margin-top: 1rem; } </style>
+#+OPTIONS: html-postamble:nil toc:nil
+
+* Problematic differences between the models
+
+- Start date is different...
+  - DICE: 2015
+  - ENTICE: 1995
+	- This is because ENTICE was published in 2003.
+- Rather than ~EInd~  for industry emissions, you have ~F~ for "carbon inputs"
+  - ~EInd~ is explictly defined as $\sigma_t Q_{\text{gross},t}(1-\mu_t)$
+  - ~F~ is loosely bounded by $\leq 0.1 \cdot \frac{\text{CarbMax}-\text{CumC}_t}{10}$
+	- Sidenote: What the fuck is ~CarbMax~. It sounds in theory like the exact same thing as ~CumC*~ (max cumulative extraction), but then why does it exist?? Thankfully, Popp never fucking mentions this again. Reproducibility at its finest.
+  - Kind of a big problem: these seem like they have semantic differences despite being used in a lot of the same places
+- Both models have some sort of a ~CumC~ metric, but handle updates in different ways.
+  - DICE: ~Ecum[t]=Ecum[t-1]+((E[t-1]-ELand[t-1])*5/3.666)~
+  - ENTICE: ~CumC[t]=CumC[t-1]+(10*F[t])~
+  - Potential resolution: these seem semantically slightly different, so just separate them?
+- DICE splits calculation of ~Q~ into ~Qgross~ and ~Q~, while ENTICE just has a ~Q~
+  - DICE does ~A[t]*((L[t]/1000)^(1-gamma-beta))*(K[t]^gamma)~ and then ~Q[t]=(Qgross[t]*(1-Omega[t]))-Lambda[t]~
+  - ENTICE has ~Q[t] = Omega[t]*(A[t]*(K[t]^gamma)*L[t]^(1-gamma -beta)*E[t]^beta)-(p_F[t]*F[t])~
+  - Comments:
+	- No equivalent of ~Lambda~ — abatement costs — in the ENTICE model
+	- Beta is price of carbon emissions in the initial period divided by gross output loosely
+	- These are algebraically equivalent basically though
+	- Division by 1000 in DICE might be problematic?
+- Utility is calculated differently...
+- Capital is different:
+  - DICE: ~K[t]=(1-deltaK)^5*K[t-1]+5*I[t-1];~
+  - ENTICE: ~K[t]=(1-deltaK)*K[t-1] + I[t] - (4*crowdout*R_E[t])~
+  - I don't know why the 5 related stuff is in the DICE model...
+- Population growth modeled differently in DICE.
+  - DICE: ~L[t]=L[t-1]*((11500/L[t-1])^gL0)~ where ~gL0~ is constant.
+  - ENTICE: ~L[t]=L0*exp(gL[t])~ and ~gL[t]=(gL0/dL)*(1-exp(-dL*t))~
+	- ~dL~ is not given what in the fuck is wrong with Popp
+	- Units are technically not given but hopefully shouldn't matter here  
+- The above kind of modeling difference also happens with total factor productivity.
+- The big, bad difference: ENTICE models the total energy usage ~E~ in this big expression primarly relating fossil fuel usage ~F[t]~ and energy capital (aka knowledge) ~H_E[t]~.
+- Climate modeling is different but we're gonna trust DICE on this one.\
+- Various units are wrong, as ENTICE has a weird tendency to use individual dollars or tons of CO2 as units. Why.
+- All the constants are probably difference. Also a "prefer DICE" moment, but the dangerous bit somewhere could be cause of units.
+
+* Bonus: Existing Fucking Problems
+- Why the actual fuck are the timesteps decades. None of the graphs in DICE2020 imply the calculation is done on the order of decades. This isn't even our fault this is just what happens when we run the stock code. 
+- Research is immediately 0.
+- When research is forcibly > 0: knowledge doesn't go up. I don't get it. It seems really slight if it ever does work.
+- Cost of carbon emissions is barely ever relevant — they may as well be free.
+- Energy usage does this funny thing where it stops being defined if there's negative emissions.
+- Common states for the semi modified model are for it to either decide to plateau towards +5 degrees temp in the next 100 years or to just be wacky noise between 0 and 5 degrees. Why?
+- ...Is the optimal utility for all of these runs /negative/? 

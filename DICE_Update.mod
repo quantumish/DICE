@@ -230,13 +230,15 @@ var EInd {t in 0..T} = sigma[t]*Qgross[t]*(1-mu[t]);
 # var EInd {t in 0..T} >= 0;
 # let {t in 0..T} EInd[t] := sigma[t]*Qgross[t]*(1-mu[t]);
 
+var CumC {t in 0..T}<=6000;
+subject to constr_cumc_idfk {t in 1..T}: CumC[t] = CumC[t-1] + 10*EInd[t];
+
 # var EInd{t in 0..T};
 # subject to constr_ind_emission {t in 0..T}: EInd[t]<=0.1*(6000-Ecum[t])/10;
 
 # emissions
 var E {t in 0..T} >= 0;
 
-# # sketchy ver half derived from backstop tech
 var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((E[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho_H);
 
 # marginal cost of carbon extraction
@@ -249,7 +251,7 @@ var P_F{t in 0..T}=q_F[t] + 163.29;
 var cprice {t in 0..T}=pback[t]*mu[t]^(Theta-1);
 
 # output net of damages and abatement (trillions 2010 USD)
-var Q {t in 0..T}=(Qgross[t]*(1-Omega[t])*E_e[t])-Lambda[t]-((P_F[t] * 10^9 * E[t])/(10^12));
+var Q {t in 0..T}=(Qgross[t]*(1-Omega[t])*E_e[t]^beta)-Lambda[t]-((P_F[t] * 10^9 * EInd[t])/(10^12));
 
 # per capita consumption (1000s 2010 USD]
 var c {t in 0..T} >= .1;
@@ -303,6 +305,7 @@ subject to initial_capital: 		K[0] = K0;
 # NOTE: this blows up a condition, so we don't do it. 
 subject to initial_research: 		R_E[0] = R_E0; # CHANGE
 subject to initial_Ecum: 			Ecum[0]=Ecum0;
+subject to initial_CumC: 			CumC[0]=EInd0; # TODO might be unreasonable lol
 subject to initial_MAT: 			MAT[0]=MAT0;
 subject to initial_TLO: 			TLO[0]=TLO0;
 subject to initial_TAT: 			TAT[0]=TAT0;

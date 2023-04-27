@@ -13,7 +13,6 @@ def main(infile# , legacy
          ):
     vals = [float(x) for x in open(infile, "r").readlines()]
     plt.plot(vals)
-    plt.ylabel("Temperature (deviation from pre-industrial)")
     plt.xlabel("Time (decades?)")
     plt.show()
 
