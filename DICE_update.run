@@ -7,7 +7,7 @@ data nonCO2_forcing.dat;
 
 option solver kestrel;
 option kestrel_options "solver=knitro";
-option email "huxmarv@nuevaschool.org";
+option email "davfrei@nuevaschool.org";
 option knitro_options "maxit=10000 opttol=1.0e-10 multistart=1 ms_terminate=1 ms_maxsolves=7 scale=1";
 
 # Climate Policy pathsways
