@@ -2,7 +2,7 @@
 
 reset;
 model DICE_Update.mod;
-# data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
+data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
 data nonCO2_forcing.dat;
 
 option solver kestrel;
@@ -24,6 +24,13 @@ printf "%f\n", E[T-1]>Results_Emissions.csv;
 
 for {t in 0..T-2}{printf "%f\n", TAT_IPCC[t]>Results_Temperature.csv;}
 printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
+
+for {t in 0..T-2}{printf "%f\n", Lambda[t]>Results_Abatement.csv;}
+printf "%f\n", Lambda[T-1]>Results_Abatement.csv;
+
+for {t in 0..T-2}{printf "%f\n", mu[t]>Results_Mu.csv;}
+printf "%f\n", mu[T-1]>Results_Mu.csv;
+
 
 for {t in 0..T-2}{
 printf "%f\t", (-1000*constr_emissions[t])/(constr_accounting[t])>Results_SCC.csv;}

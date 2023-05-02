@@ -215,8 +215,15 @@ var damage {t in 0..T}=Omega[t]*Qgross[t];
 # emission control
 var mu {t in 0..T}>=0; 
 
+param mudots {t in 0..T};
+# subject to init_mudot: mudot[0] = 0;
+# subject to constr_deltamu {t in 1..T}: mudot[t] = (mu[t]-mu[t-1]);
+
+param pli := 1;
+param that := 3;
+
 # abatement costs (fraction of output)
-var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
+var Lambda {t in 0..T}=Qgross[t]*phead[t]*((1-pli)*(mu[t]^Theta) + (pli*((that^Theta)/Theta+1)*(mudots[t]^Theta)));
 
 # industrial emissions
 var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
