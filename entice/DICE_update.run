@@ -1,7 +1,7 @@
 # AMPL run-file for Hänsel et.al (2020): "Climate economics support for the UN climate targets"
 
 reset;
-model DICE_Update.mod;
+model whee/DICE_Update.mod;
 # data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
 
 option solver kestrel;
