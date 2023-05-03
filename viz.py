@@ -12,8 +12,7 @@ def main(infile, lim# , legacy
     vals = [float(x) for x in open(infile, "r").readlines()]
     lim = 10 if lim else len(vals)
     plt.plot([2015 + (10*i) for i in range(lim)], vals[:lim])
-    plt.ylabel("Something")
-    plt.xlabel("Time (decades?)")
+    plt.xlabel("Year")
     plt.show()
 
 if __name__ == '__main__':
