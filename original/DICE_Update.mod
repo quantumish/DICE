@@ -10,56 +10,6 @@ param T:=100;
 
 #######
 
-# FIXME Ecum as CumC is likely invalid
-
-
-# ENTICE-2020
-
-# # named constant signifying i know this param exists but no idea what its value is
-# param IDK_THE_VALUE:=0;
-# # named constant signifying this is a parameter but idk how to choose it
-# param IDK_A_GOOD_VALUE:=0;
-
-# # NOTE we're using base parameters
-
-# # percentage of exogenous reductions in carbon intensity remaining
-# param alpha_phi:=0.8;
-# # scaling factor for the effect of this human capital
-# param alpha_H:=0.336;
-# # substitution parameter between energy/knowledge. rho_H <= 1
-# param rho_H:=0.38;
-
-
-# # rate of knowledge decay (<= 1)
-# param delta_H := 0;
-
-# # energy R&D spending
-# var R_E {t in 0..T}>=0;
-# let R_E[0]:=10^9;
-
-# # invention possibilities frontier constants
-# param a:=0.02961;
-# param b:=0.2;
-# param phi:=0.55;
-
-# # knowledge stock
-# param H_E{t in 0..T}>=0;
-# let H_E[0]:=0.0001; # must be >0
-# let {t in 1..T} H_E[t]:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
-
-# # the (negative) growth rate of Phi_t per decade
-# param g_t_z:=-15.49;
-# # the rate of decline of g_t_z
-# param delta_z:=23.96;
-# # the ratio of carbon emissions per unit of carbon services
-# param Phi {t in 0..T}:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)));
-
-# # percentage of other R&D crowded out by energy R&D
-# param crowdout:=0.5;
-
-#######
-
-
 # Preferences
 # delete this line for obtaining just the Nordhaus optimal policy
 # param etas {1..nruns}; 
@@ -220,19 +170,12 @@ var Lambda {t in 0..T}=Qgross[t]*phead[t]*(mu[t]^Theta);
 
 # industrial emissions
 var EInd {t in 0..T}=sigma[t]*Qgross[t]*(1-mu[t]);
-# var E_e{t in 0..T} = (alpha_H*(H_E[t]^rho) + ((EInd[t])/(alpha_phi*Phi[t]))^(rho_H))^(1/rho);
 
 # emissions
 var E {t in 0..T};
 
 # maximum cumulative extraction fossil fuels (GtC)
 var Ecum {t in 0..T}<=6000;
-
-# # marginal cost of carbon extraction
-# var q_F {t in 0..T}=113+ 700*(Ecum[t]/(6000))^4; # Ecum/6000 as model for carbon extraction dubious?
-
-# # price of carbon
-# var P_F{t in 0..T}=q_F[t] + 163.29;
 
 # Marginal cost of abatement (carbon price)
 var cprice {t in 0..T}=pback[t]*mu[t]^(Theta-1);

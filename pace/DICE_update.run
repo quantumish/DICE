@@ -2,8 +2,8 @@
 
 reset;
 model DICE_Update.mod;
-data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
-data nonCO2_forcing.dat;
+data ../delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
+data ../nonCO2_forcing.dat;
 
 option solver kestrel;
 option kestrel_options "solver=knitro";
@@ -19,53 +19,33 @@ solve;
 for {t in 0..T-2}{printf "%f\n", E[t]>Results_Emissions.csv;}
 printf "%f\n", E[T-1]>Results_Emissions.csv;
 
-for {t in 0..T-2}{printf "%f\n", R_E[t]>Results_Research.csv;}
-printf "%f\n", R_E[T-1]>Results_Research.csv;
-
-for {t in 0..T-2}{printf "%f\n", E_e[t]>Results_Energy.csv;}
-printf "%f\n", E_e[T-1]>Results_Energy.csv;
-
-for {t in 0..T-2}{printf "%f\n", CumC[t]>Results_CumC.csv;}
-printf "%f\n", CumC[T-1]>Results_CumC.csv;
-
-for {t in 0..T-2}{printf "%f\n", Ecum[t]>Results_Ecum.csv;}
-printf "%f\n", Ecum[T-1]>Results_Ecum.csv;
-
-for {t in 0..T-2}{printf "%f\n", ((P_F[t] * 10^9 * EInd[t])/10^12)>Results_CarbCost.csv;}
-printf "%f\n", ((P_F[T-1] * 10^9 * EInd[T-1])/10^12)>Results_CarbCost.csv;
+for {t in 0..T-2}{printf "%f\n", TAT_IPCC[t]>Results_Temperature.csv;}
+printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
 
 for {t in 0..T-2}{printf "%f\n", Q[t]>Results_Q.csv;}
 printf "%f\n", Q[T-1]>Results_Q.csv;
 
-for {t in 0..T-2}{printf "%f\n", I[t]>Results_I.csv;}
-printf "%f\n", I[T-1]>Results_I.csv;
-
-for {t in 0..T-2}{printf "%f\n", H_E[t]>Results_H.csv;}
-printf "%f\n", H_E[T-1]>Results_H.csv;
-
-for {t in 0..T-2}{printf "%f\n", TAT_IPCC[t]>Results_Temperature.csv;}
-printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
-
-for {t in 0..T-2}{printf "%f\n", Lambda[t]/Q[t]>Results_Abatement.csv;}
-printf "%f\n", Lambda[T-1]/Q[T-1]>Results_Abatement.csv;
+for {t in 0..T-2}{printf "%f\n", sigma[t]>Results_sigma.csv;}
+printf "%f\n", sigma[T-1]>Results_sigma.csv;
 
 for {t in 0..T-2}{printf "%f\n", mu[t]>Results_Mu.csv;}
 printf "%f\n", mu[T-1]>Results_Mu.csv;
 
+for {t in 0..T-2}{printf "%f\n", Lambda[t]/Q[t]>Results_Abatement.csv;}
+printf "%f\n", Lambda[T-1]/Q[T-1]>Results_Abatement.csv;
 
-for {t in 0..T-2}{
-printf "%f\n", (-1000*constr_emissions[t])/(constr_accounting[t])>Results_SCC.csv;}
-# printf "%f\n", (-1000*constr_emissions[T-1])/(constr_accounting[T-1])>Results_SCC.csv;
+for {t in 0..T-2}{printf "%f\n", (-1000*constr_emissions[t])/(constr_accounting[t])>Results_SCC.csv;}
+printf "%f\n", (-1000*constr_emissions[T-1])/(constr_accounting[T-1])>Results_SCC.csv;
 
 }
 
-for {i in 0..T-1}
-{  
-   printf "%f\t", i>Results_Nordhaus.csv; # change to "Results_Median_Expert" with median expert discounting parameters
-   printf "%f\t", EInd[i]>Results_Nordhaus.csv;
-   printf "%f\t", TAT_IPCC[i]>Results_Nordhaus.csv;
-   printf "%f\n", (-1000*constr_emissions[i])/(constr_accounting[i])>Results_Nordhaus.csv;
-}
+## for {i in 0..T-1}
+## {  
+##    printf "%f\t", i>Results_Nordhaus.csv; # change to "Results_Median_Expert" with median expert discounting parameters
+##    printf "%f\t", EInd[i]>Results_Nordhaus.csv;
+##    printf "%f\t", TAT_IPCC[i]>Results_Nordhaus.csv;
+##    printf "%f\n", (-1000*constr_emissions[i])/(constr_accounting[i])>Results_Nordhaus.csv;
+## }
 
 end
 
