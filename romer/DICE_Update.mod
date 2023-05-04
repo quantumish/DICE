@@ -10,56 +10,6 @@ param T:=100;
 
 #######
 
-# FIXME Ecum as CumC is likely invalid
-
-
-# ENTICE-2020
-
-# # named constant signifying i know this param exists but no idea what its value is
-# param IDK_THE_VALUE:=0;
-# # named constant signifying this is a parameter but idk how to choose it
-# param IDK_A_GOOD_VALUE:=0;
-
-# # NOTE we're using base parameters
-
-# # percentage of exogenous reductions in carbon intensity remaining
-# param alpha_phi:=0.8;
-# # scaling factor for the effect of this human capital
-# param alpha_H:=0.336;
-# # substitution parameter between energy/knowledge. rho_H <= 1
-# param rho_H:=0.38;
-
-
-# # rate of knowledge decay (<= 1)
-# param delta_H := 0;
-
-# # energy R&D spending
-# var R_E {t in 0..T}>=0;
-# let R_E[0]:=10^9;
-
-# # invention possibilities frontier constants
-# param a:=0.02961;
-# param b:=0.2;
-# param phi:=0.55;
-
-# # knowledge stock
-# param H_E{t in 0..T}>=0;
-# let H_E[0]:=0.0001; # must be >0
-# let {t in 1..T} H_E[t]:=a*(R_E[t]^b)*(H_E[t-1]) + ((1-delta_H)*H_E[t-1]); # TODO: H_E[t-1] incorrect
-
-# # the (negative) growth rate of Phi_t per decade
-# param g_t_z:=-15.49;
-# # the rate of decline of g_t_z
-# param delta_z:=23.96;
-# # the ratio of carbon emissions per unit of carbon services
-# param Phi {t in 0..T}:=exp(((g_t_z)/(delta_z)) * (1-exp(-delta_z*t)));
-
-# # percentage of other R&D crowded out by energy R&D
-# param crowdout:=0.5;
-
-#######
-
-
 # Preferences
 # delete this line for obtaining just the Nordhaus optimal policy
 # param etas {1..nruns}; 
@@ -92,12 +42,21 @@ param A0:=5.115; 				#initial level of total factor productivity
 param gA0:=0.076; 				#initial growth rate for TFP per 5 years
 param deltaA:=0.005; 			#decline rate of TFP per 5 years
 
-param gA {t in 0..T}>=0;
-let {t in 0..T} gA[t]:=gA0*exp(-deltaA*5*(t));
+param sA = 0.001; # % of pop working in R&D
+param L_A{t in 0..T}=(sA*L[t])/1000;
+param L_Y{t in 0..T}=((1-sA)*L[t])/1000;
+
+param romer_gamma:=0.5;
+param romer_phi:=0.01;
+param romer_lamdba:=0.6;
+
+# param gA {t in 0..T}>=0;
+# let {t in 0..T} gA[t]:=gA0*exp(-deltaA*5*(t));
 
 param A {t in 0..T}>=0;
 let A[0]:=A0;
-let {t in 1..T} A[t]:=A[t-1]/(1-gA[t-1]);
+let {t in 1..T} A[t]:=A[t-1]+(romer_gamma*(L_A[t]^romer_lamdba)*(A[t-1]^romer_phi));
+# let {t in 1..T} A[t]:=A[t-1]/(1-gA[t-1]);
 
 # Emission parameters, where sigma is the carbon intensity or CO2-output ratio
 param gsigma0:=-0.0152;	#initial growth of sigma (coninuous per year ), 
@@ -173,14 +132,14 @@ let pback[0]:=pback0;
 let {t in 1..T} pback[t]:=pback[t-1]*(1-gback);
 
 param phead {t in 0..T}=pback[t]*sigma[t]/Theta/1000;
-             
+
 # VARIABLES
 
 # capital (trillions 2010 USD)
 var K {t in 0..T}>=1;
 
 # Gross output (trillions 2010 USD)
-var Qgross {t in 0..T}=A[t]*((L[t]/1000)^(1-gamma))*(K[t]^gamma);
+var Qgross {t in 0..T}=((A[t]*L_Y[t])^(1-gamma))*(K[t]^gamma);
 
 # carbon cycle 
 
