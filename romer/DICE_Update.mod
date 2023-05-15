@@ -139,7 +139,7 @@ param phead {t in 0..T}=pback[t]*sigma[t]/Theta/1000;
 var K {t in 0..T}>=1;
 
 # Gross output (trillions 2010 USD)
-var Qgross {t in 0..T}=((A[t]*L_Y[t])^(1-gamma))*(K[t]^gamma);
+var Qgross {t in 0..T}=((A[t])^(1-gamma))*((L[t]/1000)^(1-gamma))*(K[t]^gamma);
 
 # carbon cycle 
 
