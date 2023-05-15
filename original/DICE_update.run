@@ -25,6 +25,9 @@ printf "%f\n", TAT_IPCC[T-1]>Results_Temperature.csv;
 for {t in 0..T-2}{printf "%f\n", Q[t]>Results_Q.csv;}
 printf "%f\n", Q[T-1]>Results_Q.csv;
 
+for {t in 0..T-2}{printf "%f\n", A[t]>Results_A.csv;}
+printf "%f\n", A[T-1]>Results_A.csv;
+
 for {t in 0..T-2}{printf "%f\n", sigma[t]>Results_sigma.csv;}
 printf "%f\n", sigma[T-1]>Results_sigma.csv;
 

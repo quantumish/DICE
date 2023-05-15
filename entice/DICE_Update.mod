@@ -155,7 +155,6 @@ param xi4:=106;	# Coefficient of heat gain by deep oceans
 param kappa:=3.6813; # Forcings of equilibrium CO2 doubling (Wm-2)
 param xi2:=kappa/nu; # climate model parameter 
 param Fex {t in 0..T};# non-CO2 forcings (Wm-2) according to REMIND SSP2 2.6
-data nonCO2_forcing.dat;
 
 # climate damage parameters
 param Psi:=0.007438; 			# Based on Howard and Sterner (2017)

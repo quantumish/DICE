@@ -1,9 +1,9 @@
 # AMPL run-file for Hänsel et.al (2020): "Climate economics support for the UN climate targets"
 
 reset;
-model whee/DICE_Update.mod;
+model DICE_Update.mod;
 # data delta_eta_joint.dat; # delete for when calculating the Nordhaus or Median Expert path
-data nonCO2_forcing.dat;
+data ../nonCO2_forcing.dat;
 
 option solver kestrel;
 option kestrel_options "solver=knitro";
@@ -21,6 +21,9 @@ printf "%f\n", E[T-1]>Results_Emissions.csv;
 
 for {t in 0..T-2}{printf "%f\n", R_E[t]>Results_Research.csv;}
 printf "%f\n", R_E[T-1]>Results_Research.csv;
+
+for {t in 0..T-2}{printf "%f\n", A[t]>Results_A.csv;}
+printf "%f\n", A[T-1]>Results_A.csv;
 
 for {t in 0..T-2}{printf "%f\n", E_e[t]>Results_Energy.csv;}
 printf "%f\n", E_e[T-1]>Results_Energy.csv;
